@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Markov Twitter</title>
+	<link rel='stylesheet' href='/bootstrap/dist/css/bootstrap.css'/>
+	<link rel='stylesheet' href='/main.css'/>
+	<script src='/angular/angular.js' defer></script>
+	<script src='/angular-ui-router/release/angular-ui-router.js' defer></script>
+	<script src='/app.js' defer></script>
+	<script src='/search/search.ctrl.js' defer></script>
+	<script src='/tweetService.js' defer></script>
+</head>
+<body ng-app="app">
+
+<nav class="navbar navbar-light bg-faded">
+	<a class="navbar-brand" ui-sref="home">MarkovTwitter</a>
+	<ul class="nav navbar-nav">
+		<li class="nav-item">
+			<a class="nav-link" ui-sref="search">Search</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" ui-sref="precomputed">Precomputed</a>
+		</li>
+	</ul>
+</nav>
+
+<ui-view></ui-view>
+
+</body>
+</html>
