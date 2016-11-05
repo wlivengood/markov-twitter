@@ -41,7 +41,7 @@ app.get('/getTweets/:user', function(req, res, next) {
 	}
 	Promise.all(promises)
 	.then(function() {
-		console.log(allTweets[0]);
+		console.log("got " + allTweets.length + " tweets");
 		name = allTweets[0].user.name;
 		userName = allTweets[0].user.screen_name;
 		thumbNailSrc = allTweets[0].user.profile_image_url;
