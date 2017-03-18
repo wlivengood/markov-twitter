@@ -1,67 +1,82 @@
-var express = require('express');
-var app = express();
-var markov = require('./markov');
-var tweetProcessing = require('./tweetProcessing');
-var Twit = require('twit');
+// Create express app
+const express = require('express');
+const app = express();
 
+// Modules for building markov chains and parsing tweets
+const markov = require('./markov');
+const tweetProcessing = require('./tweetProcessing');
 
-var client = new Twit({
-  consumer_key: 'TwxXs16xk5DCrUaOxElXz3krR',
-  consumer_secret: 'xBS8caEFwVzHqs6oAqz4O7M5INQLlm4utHmzIru78u8ACbufr5',
-  app_only_auth: true,
-  bearer_token: 'AAAAAAAAAAAAAAAAAAAAAPlIxwAAAAAA07IY8szCA4C%2FmXNFrimF36yZDlQ%3D4Sf574hpWLkj6c3uWlZM49nhWZTdlw06eYIMz6Rv9vSNLLrUEy'
-});
+// Twitter API client module
+const Twit = require('twit');
+const client = new Twit(require('./twitterConfig'));
 
+// Export the app
 module.exports = app;
 
+// Body parsing middleware
 app.use(require('body-parser').json());
+
+// Logging middleware
 app.use(require('morgan')('dev'));
 
+// Serve browser files and node_modules statically
 app.use(express.static(__dirname + '/browser'));
 app.use(express.static(__dirname + '/node_modules'));
 
+// Serve index file at '/'
 app.get('/', function(req, res, next) {
 	res.sendFile(__dirname + '/index.html');
 });
 
+
+/*
+* API for getting a fake tweet for a user
+*/
+
+let cache = {};
+
 app.get('/getTweets/:user', function(req, res, next) {
-	var userName;
-	var name;
-	var thumbNailSrc;
-	var date = new Date();
-	var allTweets = [];
-	var tweetText;
-	var promises = [];
-	var tweet = {};
-	for (var i = 0; i < 16; i++) {
-		promises.push(client.get('statuses/user_timeline.json?screen_name=' + req.params.user + "&count=200")
+	if (cache[req.params.user]) {
+		let tweet = {};
+		let cachedTweets = cache[req.params.user];
+		let tweetText = cachedTweets.map(tweet => tweet.text);
+		tweet.name = cachedTweets[0].user.name;
+		tweet.userName = cachedTweets[0].user.screen_name;
+		tweet.thumbNailSrc = cachedTweets[0].user.profile_image_url;
+		tweet.text = markov.createChain(tweetText, 30, tweetProcessing.getStarter(tweetText));
+		res.send(tweet);
+		next();
+	}
+	else {
+		let allTweets = [];
+		let tweetText;
+		let promises = [];
+		let tweet = {};
+		for (var i = 0; i < 16; i++) {
+			promises.push(client.get('statuses/user_timeline.json?screen_name=' + req.params.user + "&count=200")
 			.then(function(tweets) {
 				allTweets = allTweets.concat(tweets.data);
 			}))
-	}
-	Promise.all(promises)
-	.then(function() {
-		console.log("got " + allTweets.length + " tweets");
-		name = allTweets[0].user.name;
-		userName = allTweets[0].user.screen_name;
-		thumbNailSrc = allTweets[0].user.profile_image_url;
-		tweetText = allTweets.map(function(tweet) {
-			return tweet.text;
+		}
+		Promise.all(promises)
+		.then(function() {
+			cache[req.params.user] = allTweets;
+			tweetText = allTweets.map(tweet => tweet.text);
+			tweet.name = allTweets[0].user.name;
+			tweet.userName = allTweets[0].user.screen_name;
+			tweet.thumbNailSrc = allTweets[0].user.profile_image_url;
+			tweet.text = markov.createChain(tweetText, 30, tweetProcessing.getStarter(tweetText));
+			res.send(tweet);
 		});
-		tweet.text = markov.createChain(tweetText, 30, tweetProcessing.getStarter(tweetText));
-		tweet.name = name;
-		tweet.userName = userName;
-		tweet.thumbNailSrc = thumbNailSrc;
-		res.send(tweet);
-	});
+	}
 	
 })
 
-app.use(function (err, req, res, next) {
+app.use((err, req, res, next) => {
     console.error(err);
     res.status(500).send(err.message);
 });
 
-app.listen(3000, function() {
+app.listen(3000, () => {
 	console.log("server listening on port 3000");
 });
