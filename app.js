@@ -28,9 +28,9 @@ app.get('/', function(req, res, next) {
 	res.sendFile(__dirname + '/index.html');
 });
 
-
 /*
-* API for getting a fake tweet for a user
+* API for getting a fake tweet for a user. TODO: Need to write a recursive function to repeatedly
+* query the Twitter API for the next 200 tweets.
 */
 
 let cache = {};
@@ -53,7 +53,10 @@ app.get('/getTweets/:user', function(req, res, next) {
 		let promises = [];
 		let tweet = {};
 		for (var i = 0; i < 16; i++) {
-			promises.push(client.get('statuses/user_timeline.json?screen_name=' + req.params.user + "&count=200")
+			promises.push(client.get('statuses/user_timeline', {
+				screen_name: req.params.user,
+				count: 200
+			})
 			.then(function(tweets) {
 				allTweets = allTweets.concat(tweets.data);
 			}))
