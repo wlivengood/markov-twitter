@@ -10,7 +10,7 @@
 		<button type="submit" class="btn btn-default">Submit</button>
 	</form>
 </div>
-
+<div ng-show="loading">Loading...first request may take a few moments. Subsequent requests will be cached</div>
 <div class="well" ng-show="!!tweet.text">
 <img src="{{ tweet.thumbNailSrc }}" <blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">{{tweet.text}}</p>&mdash; {{ tweet.name }}(@{{ tweet.userName }}) <a href="#">November 5, 2016</a></blockquote>
 </div>

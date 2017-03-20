@@ -28,6 +28,42 @@ app.get('/', function(req, res, next) {
 	res.sendFile(__dirname + '/index.html');
 });
 
+
+// app.get('/getTweetsTest/:user', function(req, res, next) {
+// 	let options = {
+// 		count: 200,
+// 		screen_name: req.params.user
+// 	};
+// 	let response = [];
+
+// 	client.get('statuses/user_timeline', options).then(function(results) {
+// 		console.log(results.data.length);
+// 		getMaxHistory(results);
+// 	});
+
+// 	function getMaxHistory(results) {
+// 		console.log('here');
+// 		let data = results.data;
+// 		let max_id, options;
+// 		if (data.length > 0) {
+// 			max_id = data[data.length - 1].id - 1;
+// 			options = {};
+// 			options.count = 200;
+// 			options.max_id = max_id;
+// 			response = response.concat(data);
+// 		}
+// 		if (data.length >= 2) {
+// 			console.log('here');
+// 			client.get('statuses/user_timeline', options)
+// 			.then(getMaxHistory);
+// 		}
+// 		else {
+// 			console.log(response.length);
+// 		}
+// 	}
+// })
+
+
 /*
 * API for getting a fake tweet for a user. TODO: Need to write a recursive function to repeatedly
 * query the Twitter API for the next 200 tweets.
@@ -49,20 +85,34 @@ app.get('/getTweets/:user', function(req, res, next) {
 	}
 	else {
 		let allTweets = [];
-		let tweetText;
-		let promises = [];
 		let tweet = {};
-		for (var i = 0; i < 16; i++) {
-			promises.push(client.get('statuses/user_timeline', {
+
+		const getNext = function(response) {
+			allTweets = allTweets.concat(response.data);
+			let max = response.data[response.data.length - 1].id_str;
+			return client.get('statuses/user_timeline', {
 				screen_name: req.params.user,
-				count: 200
-			})
-			.then(function(tweets) {
-				allTweets = allTweets.concat(tweets.data);
-			}))
+				count: 200,
+				max_id: max
+			});
 		}
-		Promise.all(promises)
-		.then(function() {
+
+		client.get('statuses/user_timeline', {
+			screen_name: req.params.user,
+			count: 200
+		})
+		.then(getNext)
+		.then(getNext)
+		.then(getNext)
+		.then(getNext)
+		.then(getNext)
+		.then(getNext)
+		.then(getNext)
+		.then(getNext)
+		.then(getNext)
+		.then(function(response) {
+			allTweets = allTweets.concat(response.data);
+			console.log(allTweets.length);
 			cache[req.params.user] = allTweets;
 			tweetText = allTweets.map(tweet => tweet.text);
 			tweet.name = allTweets[0].user.name;

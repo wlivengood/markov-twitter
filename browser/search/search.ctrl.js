@@ -1,9 +1,11 @@
 app.controller("searchCtrl", function($scope, tweetService) {
 	$scope.tweet = {};
+	$scope.loading = false;
 	function getTweet() {
-		console.log("in get tweet");
+		$scope.loading = true;
 		tweetService.getTweetForUser($scope.userName)
 		.then(function(tweet) {
+			$scope.loading = false;
 			angular.copy(tweet, $scope.tweet);
 		})
 	}
