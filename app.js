@@ -79,7 +79,8 @@ app.get('/getTweets/:user', function(req, res, next) {
 		tweet.name = cachedTweets[0].user.name;
 		tweet.userName = cachedTweets[0].user.screen_name;
 		tweet.thumbNailSrc = cachedTweets[0].user.profile_image_url;
-		tweet.text = markov.createChain(tweetText, 30, tweetProcessing.getStarter(tweetText));
+		// tweet.text = markov.createChain(tweetText, 30, tweetProcessing.getStarter(tweetText));
+		tweet.text = markov.createTweet(tweetText, tweetProcessing.getStarter(tweetText));
 		res.send(tweet);
 		next();
 	}
@@ -89,18 +90,27 @@ app.get('/getTweets/:user', function(req, res, next) {
 
 		const getNext = function(response) {
 			allTweets = allTweets.concat(response.data);
+			if (response.data.length < 2) return Promise.resolve({data: []});
 			let max = response.data[response.data.length - 1].id_str;
 			return client.get('statuses/user_timeline', {
 				screen_name: req.params.user,
 				count: 200,
+				include_rts: false,
+				exclude_replies: true,
 				max_id: max
 			});
 		}
 
 		client.get('statuses/user_timeline', {
 			screen_name: req.params.user,
-			count: 200
+			count: 200,
+			include_rts: false,
+			exclude_replies: true,
 		})
+		.then(getNext)
+		.then(getNext)
+		.then(getNext)
+		.then(getNext)
 		.then(getNext)
 		.then(getNext)
 		.then(getNext)
@@ -118,7 +128,8 @@ app.get('/getTweets/:user', function(req, res, next) {
 			tweet.name = allTweets[0].user.name;
 			tweet.userName = allTweets[0].user.screen_name;
 			tweet.thumbNailSrc = allTweets[0].user.profile_image_url;
-			tweet.text = markov.createChain(tweetText, 30, tweetProcessing.getStarter(tweetText));
+			// tweet.text = markov.createChain(tweetText, 30, tweetProcessing.getStarter(tweetText));
+			tweet.text = markov.createTweet(tweetText, tweetProcessing.getStarter(tweetText));
 			res.send(tweet);
 		});
 	}
