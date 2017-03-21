@@ -21,48 +21,12 @@ app.use(require('morgan')('dev'));
 
 // Serve browser files and node_modules statically
 app.use(express.static(__dirname + '/browser'));
-app.use(express.static(__dirname + '/node_modules'));
+app.use('/vendor', express.static(__dirname + '/node_modules'));
 
 // Serve index file at '/'
 app.get('/', function(req, res, next) {
 	res.sendFile(__dirname + '/index.html');
 });
-
-
-// app.get('/getTweetsTest/:user', function(req, res, next) {
-// 	let options = {
-// 		count: 200,
-// 		screen_name: req.params.user
-// 	};
-// 	let response = [];
-
-// 	client.get('statuses/user_timeline', options).then(function(results) {
-// 		console.log(results.data.length);
-// 		getMaxHistory(results);
-// 	});
-
-// 	function getMaxHistory(results) {
-// 		console.log('here');
-// 		let data = results.data;
-// 		let max_id, options;
-// 		if (data.length > 0) {
-// 			max_id = data[data.length - 1].id - 1;
-// 			options = {};
-// 			options.count = 200;
-// 			options.max_id = max_id;
-// 			response = response.concat(data);
-// 		}
-// 		if (data.length >= 2) {
-// 			console.log('here');
-// 			client.get('statuses/user_timeline', options)
-// 			.then(getMaxHistory);
-// 		}
-// 		else {
-// 			console.log(response.length);
-// 		}
-// 	}
-// })
-
 
 /*
 * API for getting a fake tweet for a user. TODO: Need to write a recursive function to repeatedly
@@ -141,6 +105,6 @@ app.use((err, req, res, next) => {
     res.status(500).send(err.message);
 });
 
-app.listen(3000, () => {
-	console.log("server listening on port 3000");
+app.listen(process.env.PORT || 3000, () => {
+	console.log("server listening");
 });
