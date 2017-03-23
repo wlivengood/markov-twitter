@@ -95,7 +95,8 @@ app.get('/getTweets/:user', function(req, res, next) {
 			// tweet.text = markov.createChain(tweetText, 30, tweetProcessing.getStarter(tweetText));
 			tweet.text = markov.createTweet(tweetText, tweetProcessing.getStarter(tweetText));
 			res.send(tweet);
-		});
+		})
+		.catch((e) => res.send(e))
 	}
 	
 })

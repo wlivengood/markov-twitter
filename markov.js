@@ -20,7 +20,7 @@ const countChars = (tokens) => {
 const strip = (tokens) => {
 	const punctuation = '.!?';
 	let i = tokens.length - 1;
-	while (i && punctuation.indexOf(tokens[i][tokens[i].length - 1]) === -1) {
+	while (i && tokens[i] && punctuation.indexOf(tokens[i][tokens[i].length - 1]) === -1) {
 		i--;
 	}
 	return tokens.slice(0, i + 1);
