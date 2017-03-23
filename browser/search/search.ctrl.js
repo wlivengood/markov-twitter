@@ -6,6 +6,7 @@ app.controller("searchCtrl", function($scope, tweetService) {
 		$scope.loading = true;
 		tweetService.getTweetForUser($scope.userName)
 		.then(function(tweet) {
+			$scope.error = false;
 			if (!tweet.userName) $scope.error = true;
 			$scope.loading = false;
 			angular.copy(tweet, $scope.tweet);
