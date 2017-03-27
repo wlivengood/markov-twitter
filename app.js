@@ -35,16 +35,20 @@ app.get('/', (req, res, next) => {
 
 let cache = {};
 
+const populateTweet = (tweet, tweets) => {
+	let tweetText = tweets.map(tweet => tweet.text);
+	tweet.name = tweets[0].user.name;
+	tweet.userName = tweets[0].user.screen_name;
+	tweet.thumbNailSrc = tweets[0].user.profile_image_url;
+	tweet.text = markov.createTweet(tweetText, tweetProcessing.getStarter(tweetText));
+}
+
 app.get('/getTweets/:user', (req, res, next) => {
 
 	if (cache[req.params.user]) {
 		let tweet = {};
 		let cachedTweets = cache[req.params.user];
-		let tweetText = cachedTweets.map(tweet => tweet.text);
-		tweet.name = cachedTweets[0].user.name;
-		tweet.userName = cachedTweets[0].user.screen_name;
-		tweet.thumbNailSrc = cachedTweets[0].user.profile_image_url;
-		tweet.text = markov.createTweet(tweetText, tweetProcessing.getStarter(tweetText));
+		populateTweet(tweet, cachedTweets);
 		res.send(tweet);
 		next();
 	}
@@ -78,11 +82,7 @@ app.get('/getTweets/:user', (req, res, next) => {
 		.then(() => {
 			cache[req.params.user] = allTweets;
 			let tweet = {};
-			tweetText = allTweets.map(tweet => tweet.text);
-			tweet.name = allTweets[0].user.name;
-			tweet.userName = allTweets[0].user.screen_name;
-			tweet.thumbNailSrc = allTweets[0].user.profile_image_url;
-			tweet.text = markov.createTweet(tweetText, tweetProcessing.getStarter(tweetText));
+			populateTweet(tweet, allTweets);
 			res.send(tweet);
 		})
 		.catch((e) => res.send(e));
