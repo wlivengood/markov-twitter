@@ -32,7 +32,7 @@ const createTweet = (tweets, pair) => {
 	tweets.forEach(tweet => hashTokens(table, tokenize(tweet)));
 	let next = getNext(table, pair);
 	tokens.push(next);
-	while (countChars(tokens) < 140) {
+	while (countChars(tokens) < 150) {
 		pair = [tokens[tokens.length-2], next];
 		next = getNext(table, pair);
 		if (!next) break;
