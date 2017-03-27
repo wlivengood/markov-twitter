@@ -13,9 +13,6 @@ const client = new Twit(require('./twitterConfig'));
 // Export the app
 module.exports = app;
 
-// Body parsing middleware
-app.use(require('body-parser').json());
-
 // Logging middleware
 app.use(require('morgan')('dev'));
 
@@ -24,7 +21,7 @@ app.use(express.static(__dirname + '/browser'));
 app.use('/vendor', express.static(__dirname + '/node_modules'));
 
 // Serve index file at '/'
-app.get('/', function(req, res, next) {
+app.get('/', (req, res, next) => {
 	res.sendFile(__dirname + '/index.html');
 });
 
@@ -47,7 +44,6 @@ app.get('/getTweets/:user', (req, res, next) => {
 		tweet.name = cachedTweets[0].user.name;
 		tweet.userName = cachedTweets[0].user.screen_name;
 		tweet.thumbNailSrc = cachedTweets[0].user.profile_image_url;
-		// tweet.text = markov.createChain(tweetText, 30, tweetProcessing.getStarter(tweetText));
 		tweet.text = markov.createTweet(tweetText, tweetProcessing.getStarter(tweetText));
 		res.send(tweet);
 		next();
@@ -62,11 +58,11 @@ app.get('/getTweets/:user', (req, res, next) => {
 
 		let allTweets = []
 
-		function getNext(max=null) {
+		const getNext = (max=null) => {
 			return new Promise((resolve, reject) => {
 				if (max) opts.max_id = max;
 				client.get('statuses/user_timeline', opts)
-				.then(function(response) {
+				.then((response) => {
 					if (response.data.length > 2) {
 						allTweets = allTweets.concat(response.data);
 						getNext(response.data[response.data.length - 1].id_str)

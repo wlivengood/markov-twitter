@@ -17,7 +17,6 @@
   "dependencies": {
     "angular": "^1.5.8",
     "angular-ui-router": "^0.3.2",
-    "body-parser": "^1.15.2",
     "bootstrap": "^3.3.7",
     "express": "^4.14.0",
     "morgan": "^1.8.1",
