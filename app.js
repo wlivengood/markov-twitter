@@ -33,8 +33,10 @@ app.get('/', (req, res, next) => {
 * a given username, the results are cached. TODO: Implement an LRU cache for the cache.
 */
 
+// Stores results of calls to the Twitter API (not the results of processing the tweets)
 let cache = {};
 
+// Populates the tweet with real user fields and fake (markov-chain-generated) text
 const populateTweet = (tweet, tweets) => {
 	let tweetText = tweets.map(tweet => tweet.text);
 	tweet.name = tweets[0].user.name;
@@ -45,6 +47,7 @@ const populateTweet = (tweet, tweets) => {
 
 app.get('/getTweets/:user', (req, res, next) => {
 
+	// If the user's tweets are cached, use the cache
 	if (cache[req.params.user]) {
 		let tweet = {};
 		let cachedTweets = cache[req.params.user];
@@ -52,6 +55,7 @@ app.get('/getTweets/:user', (req, res, next) => {
 		res.send(tweet);
 		next();
 	}
+	// Otherwise hit the Twitter API recursively until we aren't getting any results back
 	else {
 		let opts = {
 			screen_name: req.params.user,
