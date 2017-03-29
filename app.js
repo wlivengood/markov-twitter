@@ -3,8 +3,8 @@ const express = require('express');
 const app = express();
 
 // Modules for building markov chains and parsing tweets
-const markov = require('./markov');
-const tweetProcessing = require('./tweetProcessing');
+const markov = require('./utils/markov');
+const tweetProcessing = require('./utils/tweetProcessing');
 
 // Twitter API client module
 const Twit = require('twit');
@@ -32,7 +32,7 @@ app.get('/', (req, res, next) => {
 */
 
 // Stores results of calls to the Twitter API (not the results of processing the tweets)
-let LRUCache = require('./LRU');
+let LRUCache = require('./utils/LRU');
 let cache = new LRUCache(10);
 
 // Populates the tweet with real user fields and fake (markov-chain-generated) text
