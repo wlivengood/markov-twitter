@@ -10,9 +10,6 @@ const tweetProcessing = require('./tweetProcessing');
 const Twit = require('twit');
 const client = new Twit(require('./twitterConfig'));
 
-// Export the app
-module.exports = app;
-
 // Logging middleware
 app.use(require('morgan')('dev'));
 
@@ -30,11 +27,13 @@ app.get('/', (req, res, next) => {
 * API for getting a fake tweet from a user. Because the Twitter API only serves tweets from
 * a timeline 200 at a time, we have to recursively call the API, passing in a the oldest
 * tweet each time to get the next oldest batch of 200 tweets. After this is done once for
-* a given username, the results are cached. TODO: Implement an LRU cache for the cache.
+* a given username, the results are cached in an LRU cache that stores up to 10 users' worth
+* of tweets
 */
 
 // Stores results of calls to the Twitter API (not the results of processing the tweets)
-let cache = {};
+let LRUCache = require('./LRU');
+let cache = new LRUCache(10);
 
 // Populates the tweet with real user fields and fake (markov-chain-generated) text
 const populateTweet = (tweet, tweets) => {
@@ -48,9 +47,9 @@ const populateTweet = (tweet, tweets) => {
 app.get('/getTweets/:user', (req, res, next) => {
 
 	// If the user's tweets are cached, use the cache
-	if (cache[req.params.user]) {
+	if (cache.contains(req.params.user)) {
 		let tweet = {};
-		let cachedTweets = cache[req.params.user];
+		let cachedTweets = cache.getVal(req.params.user);
 		populateTweet(tweet, cachedTweets);
 		res.send(tweet);
 		next();
@@ -84,7 +83,7 @@ app.get('/getTweets/:user', (req, res, next) => {
 		}
 		getNext()
 		.then(() => {
-			cache[req.params.user] = allTweets;
+			cache.putVal(req.params.user, allTweets);
 			let tweet = {};
 			populateTweet(tweet, allTweets);
 			res.send(tweet);
