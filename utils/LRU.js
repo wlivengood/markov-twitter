@@ -37,7 +37,7 @@ class LRUCache {
 
 		// If it's the LRU, remove it from the queue and update the LRU
 		let next = temp.next;
-		let prev = temp.prev;
+		let prev = temp.previous;
 		if (temp.key === this.LRU.key) {
 			next.previous = null;
 			this.LRU = next;
